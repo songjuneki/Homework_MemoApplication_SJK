@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: MemoViewHolder, position: Int) {
             holder.binding.apply {
                 memoRawTitle.text = memoList[position].title
-                memoRawDate.text = Util.dateString(memoList[position].date)
+                memoRawDate.text = memoList[position].date
             }
         }
     }
