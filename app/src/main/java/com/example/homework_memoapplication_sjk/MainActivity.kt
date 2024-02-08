@@ -5,12 +5,13 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.homework_memoapplication_sjk.databinding.ActivityMainBinding
 import com.example.homework_memoapplication_sjk.databinding.MemoRawBinding
-import com.google.android.material.divider.MaterialDividerItemDecoration
 
 class MainActivity : AppCompatActivity() {
 
@@ -64,12 +65,12 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
             with(homeMemoList) {
                 adapter = MemoRecyclerAdapter()
-                val deco = MaterialDividerItemDecoration(this@MainActivity, MaterialDividerItemDecoration.VERTICAL)
-                addItemDecoration(deco)
+                layoutManager = LinearLayoutManager(this@MainActivity)
             }
         }
     }
 
+    // 메모를 추가하고 RecyclerView 갱신
     private fun addMemo(memo: Memo?) {
         if (memo == null)
             return
@@ -79,7 +80,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class MemoRecyclerAdapter: RecyclerView.Adapter<MemoRecyclerAdapter.MemoViewHolder>() {
-        inner class MemoViewHolder(val binding: MemoRawBinding): RecyclerView.ViewHolder(binding.root)
+        inner class MemoViewHolder(val binding: MemoRawBinding): RecyclerView.ViewHolder(binding.root) {
+            init {
+                binding.root.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+            }
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoViewHolder {
             val memoBinding = MemoRawBinding.inflate(layoutInflater)
