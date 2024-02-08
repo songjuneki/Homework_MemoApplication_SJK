@@ -1,11 +1,100 @@
 package com.example.homework_memoapplication_sjk
 
+import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.recyclerview.widget.RecyclerView
+import com.example.homework_memoapplication_sjk.databinding.ActivityMainBinding
+import com.example.homework_memoapplication_sjk.databinding.MemoRawBinding
+import com.google.android.material.divider.MaterialDividerItemDecoration
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    private lateinit var addMemoContract: ActivityResultContracts.StartActivityForResult
+    private lateinit var addMemoLauncher: ActivityResultLauncher<Intent>
+
+    private val memoList: MutableList<Memo> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        initAddMemoContract()
+        initToolbar()
+        initRecyclerView()
+    }
+
+    // 메모 추가 Activity Launcher 를 설정한다.
+    private fun initAddMemoContract() {
+        addMemoContract = ActivityResultContracts.StartActivityForResult()
+        addMemoLauncher = registerForActivityResult(addMemoContract) {
+            if (it.resultCode == RESULT_OK) {
+                val memo: Memo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    it.data?.getParcelableExtra("memo", Memo::class.java)
+                else
+                    it.data?.getParcelableExtra("memo")
+
+                addMemo(memo)
+            }
+        }
+    }
+
+    // Toolbar 를 설정한다.
+    private fun initToolbar() {
+        binding.apply {
+            homeToolbar.setOnMenuItemClickListener {
+                if (it.itemId == R.id.main_menu_add) {
+                    val addMemoIntent = Intent(this@MainActivity, AddMemoActivity::class.java)
+                    addMemoLauncher.launch(addMemoIntent)
+                }
+                return@setOnMenuItemClickListener false
+            }
+        }
+    }
+
+    // RecyclerView 를 설정한다.
+    private fun initRecyclerView() {
+        binding.apply {
+            with(homeMemoList) {
+                adapter = MemoRecyclerAdapter()
+                val deco = MaterialDividerItemDecoration(this@MainActivity, MaterialDividerItemDecoration.VERTICAL)
+                addItemDecoration(deco)
+            }
+        }
+    }
+
+    private fun addMemo(memo: Memo?) {
+        if (memo == null)
+            return
+
+        memoList.add(memo)
+        binding.homeMemoList.adapter?.notifyDataSetChanged()
+    }
+
+    inner class MemoRecyclerAdapter: RecyclerView.Adapter<MemoRecyclerAdapter.MemoViewHolder>() {
+        inner class MemoViewHolder(val binding: MemoRawBinding): RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoViewHolder {
+            val memoBinding = MemoRawBinding.inflate(layoutInflater)
+            return MemoViewHolder(memoBinding)
+        }
+
+        override fun getItemCount(): Int {
+            return memoList.size
+        }
+
+        override fun onBindViewHolder(holder: MemoViewHolder, position: Int) {
+            holder.binding.apply {
+                memoRawTitle.text = memoList[position].title
+                memoRawDate.text = Util.dateString(memoList[position].date)
+            }
+        }
     }
 }
