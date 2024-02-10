@@ -23,6 +23,8 @@
         </activity>
         <activity android:name=".AddMemoActivity"
             android:exported="false" />
+        <activity android:name=".InfoMemoActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
